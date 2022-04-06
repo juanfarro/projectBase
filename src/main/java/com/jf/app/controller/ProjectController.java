@@ -1,10 +1,12 @@
 package com.jf.app.controller;
 
 import com.jf.app.entity.Project;
+import com.jf.app.entity.Type;
 import com.jf.app.model.ProjectDto;
 import com.jf.app.service.ProjectService;
+import com.jf.app.service.TypeService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,35 +19,46 @@ import javax.validation.Valid;
 import java.util.Optional;
 
 @Slf4j
-//@RequiredArgsConstructor
+@RequiredArgsConstructor
 @RestController
-@RequestMapping(value = "/projects")
+@RequestMapping(path = "/projects")
 public class ProjectController {
 
-    @Autowired
-    private ProjectService projectService;
+    private final ProjectService projectService;
+    private final TypeService typeService;
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity create(@Valid @RequestBody ProjectDto projectDto){
 
-        projectService.create(projectDto, 1L);
+        if(typeService.getAll(PageRequest.of(1, 10)).getContent().isEmpty()){
+            Type t1 = new Type();
+            t1.setName("Type one");
+
+            Type t2 = new Type();
+            t2.setName("Type two");
+
+            typeService.create(t1);
+            typeService.create(t2);
+        }
+
+        projectService.create(projectDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(projectDto);
     }
 
     @GetMapping(path = "/{idProject}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getByEmail(@PathVariable("idProject") Long idProject){
+    public ResponseEntity<?> getById(@PathVariable("idProject") Long idProject){
         Optional<Project> project = projectService.get(idProject);
         if(project.isPresent()){
-            return ResponseEntity.ok().body(project.get());
+            return ResponseEntity.status(HttpStatus.OK).body(project.get());
         }
         else {
-            return ResponseEntity.badRequest().body("Project not found");
+            return ResponseEntity.notFound().build();
         }
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Page<Project>> getAllByPage(@RequestParam(required = false, name = "page", defaultValue = "1") int page,
+    public ResponseEntity<Page<Project>> getAllByPage(@RequestParam(required = false, name = "page", defaultValue = "0") int page,
                                                    @RequestParam(required = false, name = "limit", defaultValue = "50") int limit){
         Pageable pageable = PageRequest.of(page, limit);
         Page<Project> projects = projectService.getAll(pageable);

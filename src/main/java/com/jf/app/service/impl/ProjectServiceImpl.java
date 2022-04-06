@@ -26,9 +26,9 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectMappers projectMappers;
 
     @Override
-    public void create(ProjectDto projectDto, Long idType) {
+    public void create(ProjectDto projectDto) {
         Project project = projectMappers.map(projectDto);
-        project.setType(typeRepository.findById(idType).get());
+        project.setType(typeRepository.findById(projectDto.getIdType()).get());
         projectRepository.save(project);
     }
 

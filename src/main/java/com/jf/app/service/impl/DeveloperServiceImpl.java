@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -50,6 +51,7 @@ public class DeveloperServiceImpl implements DeveloperService {
 
         if(devToUpdate.isPresent()){
             Developer dev = developerMappers.map(developer);
+            dev.setProject(projectRepository.findById(idProject).get());
             developerRepository.save(dev);
         }
 

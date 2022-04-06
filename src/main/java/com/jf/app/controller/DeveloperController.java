@@ -59,8 +59,8 @@ public class DeveloperController {
         return ResponseEntity.ok().body(developerService.update(developerDto, idDev, idProject));
     }
 
-    @DeleteMapping(path = "/{idProject}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> delete(@PathVariable("idDev") Long idDev) {
+    @DeleteMapping(path = "/{idDev}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> delete(@PathVariable("idProject") Long idProject, @PathVariable("idDev") Long idDev) {
         developerService.delete(idDev);
         return ResponseEntity.ok().body("Developer is deleted");
     }

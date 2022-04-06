@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface ProjectService {
 
-    void create(ProjectDto projectDto, Long idType);
+    void create(ProjectDto projectDto);
 
     Optional<Project> get(Long id);
 

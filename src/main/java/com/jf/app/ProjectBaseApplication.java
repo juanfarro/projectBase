@@ -6,7 +6,7 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"com.jf.projectBase.mapper"})
+//@ComponentScan(basePackages = {"com.jf.projectBase.mapper"})
 //@Configuration
 //@EnableAutoConfiguration
 //@EntityScan(basePackages = {"com.jf.projectBase.entity"})

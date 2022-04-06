@@ -1,11 +1,14 @@
 package com.jf.app.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
@@ -37,5 +40,5 @@ public class Project {
     private Type type;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
-    private Collection<Developer> developers;
+    private Collection<Developer> developers = new ArrayList<>();
 }
