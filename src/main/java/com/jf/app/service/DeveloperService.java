@@ -9,13 +9,13 @@ import java.util.Optional;
 
 public interface DeveloperService {
 
-    void create(DeveloperDto developer, Long idProject);
+    Developer create(Developer developer, Long idProject);
 
-    Optional<Developer> get(Long id);
+    Optional<Developer> get(Long idDev, Long idProject);
 
     Page<Developer> getAll(Pageable pageable, Long idProject);
 
-    Developer update(DeveloperDto developer, Long idDev, Long idProject);
+    Developer update(Developer developer, Long idDev, Long idProject);
 
     void delete(Long id);
 }

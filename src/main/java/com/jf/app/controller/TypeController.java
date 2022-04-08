@@ -23,7 +23,7 @@ public class TypeController {
     private final TypeService typeService;
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Page<Type>> getAllByPage(@RequestParam(required = false, name = "page", defaultValue = "1") int page,
+    public ResponseEntity<Page<Type>> getAllByPage(@RequestParam(required = false, name = "page", defaultValue = "0") int page,
                                                    @RequestParam(required = false, name = "limit", defaultValue = "50") int limit){
         Pageable pageable = PageRequest.of(page, limit);
         Page<Type> types = typeService.getAll(pageable);

@@ -1,6 +1,8 @@
 package com.jf.app.service.impl;
 
 import com.jf.app.entity.Developer;
+import com.jf.app.entity.Project;
+import com.jf.app.exception.ResourceNotFoundException;
 import com.jf.app.model.DeveloperDto;
 import com.jf.app.repository.DeveloperRepository;
 import com.jf.app.repository.ProjectRepository;
@@ -11,8 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import javax.swing.text.html.Option;
 import java.util.Optional;
 
 @Slf4j
@@ -24,38 +26,57 @@ public class DeveloperServiceImpl implements DeveloperService {
 
     private final ProjectRepository projectRepository;
 
-    private final DeveloperMappers developerMappers;
+
 
     @Override
-    public void create(DeveloperDto developer, Long idProject) {
+    public Developer create(Developer developer, Long idProject) {
 
-        Developer dev = developerMappers.map(developer);
-        dev.setProject(projectRepository.findById(idProject).get());
-        developerRepository.save(dev);
+        Optional<Project> p = projectRepository.findById(idProject);
+
+        if(p.isPresent()){
+            developer.setProject(p.get());
+        } else throw new ResourceNotFoundException(Project.class, idProject);
+
+        return developerRepository.save(developer);
     }
 
     @Override
-    public Optional<Developer> get(Long id) {
-        return developerRepository.findById(id);
+    public Optional<Developer> get(Long idDev, Long idProject) {
+
+        if(projectRepository.findById(idProject).isEmpty()) throw new ResourceNotFoundException(Project.class, idProject);
+
+        return developerRepository.findById(idDev);
     }
 
     @Override
     public Page<Developer> getAll(Pageable pageable, Long idProject) {
-        return developerRepository.findByProject(pageable, idProject);
+
+        Optional<Project> p = projectRepository.findById(idProject);
+
+        if(p.isPresent()){
+            return developerRepository.findByProject(p.get(), pageable);
+        } else throw new ResourceNotFoundException(Project.class, idProject);
+
     }
 
     @Override
-    public Developer update(DeveloperDto developer, Long idDev, Long idProject) {
+    public Developer update(Developer developer, Long idDev, Long idProject) {
+
+        Optional<Project> p = projectRepository.findById(idProject);
+
+        if(p.isPresent()){
+            developer.setProject(p.get());
+        } else throw new ResourceNotFoundException(Project.class, idProject);
 
         Optional<Developer> devToUpdate = developerRepository.findById(idDev);
 
         if(devToUpdate.isPresent()){
-            Developer dev = developerMappers.map(developer);
-            dev.setProject(projectRepository.findById(idProject).get());
-            developerRepository.save(dev);
-        }
-
-        return null;
+            Developer dev =devToUpdate.get();
+            dev.setFirstName(developer.getFirstName());
+            dev.setLastName(developer.getLastName());
+            dev.setSeniority(developer.getSeniority());
+            return developerRepository.save(dev);
+        } else throw new ResourceNotFoundException(Developer.class, idDev);
     }
 
     @Override

@@ -9,13 +9,13 @@ import java.util.Optional;
 
 public interface ProjectService {
 
-    void create(ProjectDto projectDto);
+    Project create(Project project, Long idType);
 
     Optional<Project> get(Long id);
 
     Page<Project> getAll(Pageable pageable);
 
-    Project update(ProjectDto projectDto, Long id);
+    Project update(Project projectDto, Long id);
 
     void delete(Long id);
 }

@@ -1,5 +1,7 @@
 package com.jf.app.controller;
 
+import com.jf.app.exception.ResourceNotFoundException;
+import com.jf.app.mapper.DeveloperMappers;
 import com.jf.app.model.DeveloperDto;
 import com.jf.app.service.DeveloperService;
 import com.jf.app.entity.Developer;
@@ -18,48 +20,46 @@ import javax.validation.Valid;
 import java.util.Optional;
 
 @Slf4j
-@Validated
 @RequiredArgsConstructor
 @RestController
-@RequestMapping(path = "/projects/{idProject}/developers")
+@RequestMapping(path = "/projects")
 public class DeveloperController {
 
     private final DeveloperService developerService;
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity create(@Valid @RequestBody DeveloperDto developerDto, @PathVariable("idProject") Long idProject){
-        developerService.create(developerDto, idProject);
-        return ResponseEntity.status(HttpStatus.CREATED).body(developerDto);
+    private final DeveloperMappers developerMappers;
+
+    @PostMapping(path = "/{idProject}/developers", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity create(@Valid @RequestBody DeveloperDto developerDto, @PathVariable Long idProject){
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(developerService.create(developerMappers.map(developerDto), idProject));
     }
 
-    @GetMapping(path = "/{idDev}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getByEmail(@PathVariable("idProject") Long idProject, @PathVariable("idDev") Long idDev){
-        Optional<Developer> developer = developerService.get(idDev);
+    @GetMapping(path = "/{idProject}/developers/{idDev}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity getById(@PathVariable Long idProject, @PathVariable Long idDev){
+        Optional<Developer> developer = developerService.get(idDev, idProject);
         if(developer.isPresent()){
             return ResponseEntity.ok().body(developer.get());
-        }
-        else {
-            return ResponseEntity.badRequest().body("Developer not found");
-        }
+        } else throw new ResourceNotFoundException(Developer.class, idDev);
     }
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Page<Developer>> getAllByPage(@RequestParam(required = false, name = "page", defaultValue = "1") int page,
+    @GetMapping(path = "/{idProject}/developers", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Page<Developer>> getAllByPage(@RequestParam(required = false, name = "page", defaultValue = "0") int page,
                                                       @RequestParam(required = false, name = "limit", defaultValue = "50") int limit,
-                                                        @PathVariable("idProject") Long idProject, @PathVariable("idDev") Long idDev){
+                                                        @PathVariable("idProject") Long idProject){
         Pageable pageable = PageRequest.of(page, limit);
         Page<Developer> devs = developerService.getAll(pageable, idProject);
         return ResponseEntity.ok().body(devs);
     }
 
-    @PutMapping(path = "/{idDev}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity updateRole(@Valid @RequestBody DeveloperDto developerDto,
+    @PutMapping(path = "/{idProject}/developers/{idDev}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity updateDev(@Valid @RequestBody DeveloperDto developerDto,
                                      @PathVariable("idProject") Long idProject,
                                      @PathVariable("idDev") Long idDev){
-        return ResponseEntity.ok().body(developerService.update(developerDto, idDev, idProject));
+        return ResponseEntity.ok().body(developerService.update(developerMappers.map(developerDto), idDev, idProject));
     }
 
-    @DeleteMapping(path = "/{idDev}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(path = "/{idProject}/developers/{idDev}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> delete(@PathVariable("idProject") Long idProject, @PathVariable("idDev") Long idDev) {
         developerService.delete(idDev);
         return ResponseEntity.ok().body("Developer is deleted");

@@ -1,6 +1,8 @@
 package com.jf.app.service.impl;
 
 import com.jf.app.entity.Project;
+import com.jf.app.entity.Type;
+import com.jf.app.exception.ResourceNotFoundException;
 import com.jf.app.model.ProjectDto;
 import com.jf.app.repository.ProjectRepository;
 import com.jf.app.repository.TypeRepository;
@@ -23,13 +25,16 @@ public class ProjectServiceImpl implements ProjectService {
 
     private final TypeRepository typeRepository;
 
-    private final ProjectMappers projectMappers;
-
     @Override
-    public void create(ProjectDto projectDto) {
-        Project project = projectMappers.map(projectDto);
-        project.setType(typeRepository.findById(projectDto.getIdType()).get());
-        projectRepository.save(project);
+    public Project create(Project project, Long idType) {
+
+        Optional<Type> t = typeRepository.findById(idType);
+
+        if(t.isPresent()){
+            project.setType(t.get());
+        } else throw new ResourceNotFoundException(Type.class, idType);
+
+        return projectRepository.save(project);
     }
 
     @Override
@@ -43,15 +48,16 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Project update(ProjectDto projectDto, Long id) {
+    public Project update(Project projectDto, Long id) {
         Optional<Project> projectToUpdate = projectRepository.findById(id);
 
         if(projectToUpdate.isPresent()){
-            Project project = projectMappers.map(projectDto);
-            projectRepository.save(project);
-        }
-
-        return null;
+            Project project = projectToUpdate.get();
+            project.setName(projectDto.getName());
+            project.setTechnology(projectDto.getTechnology());
+            project.setDelivery(projectDto.getDelivery());
+            return projectRepository.save(project);
+        }else throw new ResourceNotFoundException(Project.class, id);
     }
 
     @Override
